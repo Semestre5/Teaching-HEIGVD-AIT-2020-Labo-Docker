@@ -1,8 +1,9 @@
 # The base image is one of the offical one
 FROM node:latest
 
-# TODO: [GEN] Replace with your name and email
-LABEL Daniel Palumbo <daniel.palumbo@heig-vd.ch>
+LABEL Axel Vallon <axel.vallon@heig-vd.ch>
+LABEL Robin Gaudin <robin.gaudin@heig-vd.ch>
+LABEL Lev Pozniakoff <lev.pozniakoff@heig-vd.ch>
 
 # Install the required tools to run our webapp and some utils
 RUN apt-get update && apt-get -y install wget curl vim && apt-get clean && npm install -g bower
@@ -15,19 +16,26 @@ RUN cd /backend/app && npm install && bower install --allow-root
 
 # TODO: [S6] Install
 
-# TODO: [Serf] Install
+# Install serf (for decentralized cluster membership: https://www.serf.io/)
+RUN mkdir /opt/bin \
+    && curl -sSLo /tmp/serf.gz https://releases.hashicorp.com/serf/0.8.2/serf_0.8.2_linux_amd64.zip \
+    && gunzip -c /tmp/serf.gz > /opt/bin/serf \
+    && chmod 755 /opt/bin/serf \
+    && rm -f /tmp/serf.gz
 
-# TODO: [S6] Replace the two following instructions
 # Copy the starting script and make it executable
 COPY scripts /scripts/
 RUN chmod +x /scripts/*.sh
 
-# TODO: [Serf] Add Serf S6 setup
+# Add Serf S6 setup
+COPY services/serf /serf/
+RUN chmod +x /serf/run
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# TODO: [Serf] Expose ports
+# Expose the ports for Serf
+EXPOSE 7946 7373
 
 # Expose the web application port
 EXPOSE 3000
@@ -37,4 +45,4 @@ ENV ROLE backend
 
 # TODO: [S6] Replace the following instruction
 # Command executed when the container starts
-CMD [ "/scripts/run.sh" ]
+CMD [ "bash", "/serf/run" ]
