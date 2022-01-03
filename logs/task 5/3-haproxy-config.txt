@@ -1,3 +1,4 @@
+root@e309df0ee532:/# cat /usr/local/etc/haproxy/haproxy.cfg
 # Global configuration for HAProxy
 # http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#3
 global
@@ -50,7 +51,7 @@ defaults
 
 # Open the metrics HAProxy page on the port 1936 on any network interface on the host
 # http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4
-listen stats 
+listen stats
     bind *:1936
     # Enable HAProxy to serve stats about himself and the nodes
     # http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-stats%20enable
@@ -109,6 +110,9 @@ backend nodes
     # http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-server
 
     # HANDLEBARS START
+
+    server 246fe2229757 192.168.42.11:3000 check
+
     # HANDLEBARS STOP
 
 # Other links you will need later for this lab

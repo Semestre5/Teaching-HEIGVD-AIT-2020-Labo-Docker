@@ -14,7 +14,10 @@ RUN apt-get update && apt-get -y install wget curl vim && apt-get clean && npm i
 COPY app /backend/app
 RUN cd /backend/app && npm install && bower install --allow-root
 
-# TODO: [S6] Install
+# Download and install S6 overlay
+RUN curl -sSLo /tmp/s6.tar.gz https://github.com/just-containers/s6-overlay/releases/download/v2.1.0.2/s6-overlay-amd64.tar.gz \
+  && tar xzf /tmp/s6.tar.gz -C / \
+  && rm -f /tmp/s6.tar.gz
 
 # Install serf (for decentralized cluster membership: https://www.serf.io/)
 RUN mkdir /opt/bin \
@@ -23,13 +26,13 @@ RUN mkdir /opt/bin \
     && chmod 755 /opt/bin/serf \
     && rm -f /tmp/serf.gz
 
-# Copy the starting script and make it executable
-COPY scripts /scripts/
-RUN chmod +x /scripts/*.sh
+# Copy the S6 service and make the run script executable
+COPY services/node /etc/services.d/node
+RUN chmod +x /etc/services.d/node/run
 
-# Add Serf S6 setup
-COPY services/serf /serf/
-RUN chmod +x /serf/run
+# Add Serf to S6
+COPY services/serf /etc/services.d/serf
+RUN chmod +x /etc/services.d/serf/run
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -45,4 +48,4 @@ ENV ROLE backend
 
 # TODO: [S6] Replace the following instruction
 # Command executed when the container starts
-CMD [ "bash", "/serf/run" ]
+ENTRYPOINT ["/init"]

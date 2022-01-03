@@ -1,0 +1,74 @@
+[s6-init] making user provided files available at /var/run/s6/etc...exited 0.
+[s6-init] ensuring user provided files have correct perms...exited 0.
+[fix-attrs.d] applying ownership & permissions fixes...
+[fix-attrs.d] done.
+[cont-init.d] executing container initialization scripts...
+[cont-init.d] done.
+[services.d] starting services
+/opt/bin/serf agent --join ha --tag role=backend
+[services.d] done.
+==> Starting Serf agent...
+==> Starting Serf agent RPC...
+==> Serf agent running!
+         Node name: '41da9af6ab9f'
+         Bind addr: '0.0.0.0:7946'
+                       RPC addr: '127.0.0.1:7373'
+                      Encrypted: false
+                       Snapshot: false
+                        Profile: lan
+    Message Compression Enabled: true
+==> Joining cluster...(replay: false)
+==> 1 error occurred:
+	* Failed to join 192.168.42.42: dial tcp 192.168.42.42:7946: connect: connection refused
+
+
+Application started
+/opt/bin/serf agent --join ha --tag role=backend
+==> Starting Serf agent...
+==> Starting Serf agent RPC...
+==> Serf agent running!
+         Node name: '41da9af6ab9f'
+         Bind addr: '0.0.0.0:7946'
+                       RPC addr: '127.0.0.1:7373'
+                      Encrypted: false
+                       Snapshot: false
+                        Profile: lan
+    Message Compression Enabled: true
+==> Joining cluster...(replay: false)
+    Join completed. Synced with 1 initial agents
+
+==> Log data will now stream in as it occurs:
+
+    2022/01/03 14:33:33 [INFO] agent: Serf agent starting
+    2022/01/03 14:33:33 [INFO] serf: EventMemberJoin: 41da9af6ab9f 192.168.42.22
+    2022/01/03 14:33:33 [INFO] agent: joining: [ha] replay: false
+    2022/01/03 14:33:33 [INFO] serf: EventMemberJoin: c55cd5d0eb73 192.168.42.11
+    2022/01/03 14:33:33 [INFO] serf: EventMemberJoin: 0441315ca491 192.168.42.42
+    2022/01/03 14:33:33 [INFO] agent: joined: 1 nodes
+[0mHEAD / [32m200 [0m22.801 ms - 129[0m
+    2022/01/03 14:33:34 [INFO] agent: Received event: member-join
+[0mHEAD / [32m200 [0m5.029 ms - 129[0m
+[0mHEAD / [32m200 [0m3.259 ms - 129[0m
+[0mHEAD / [32m200 [0m3.604 ms - 129[0m
+[0mHEAD / [32m200 [0m4.110 ms - 129[0m
+[0mHEAD / [32m200 [0m3.369 ms - 129[0m
+[0mHEAD / [32m200 [0m3.619 ms - 129[0m
+[0mHEAD / [32m200 [0m2.194 ms - 129[0m
+[0mHEAD / [32m200 [0m3.998 ms - 129[0m
+[0mHEAD / [32m200 [0m2.924 ms - 129[0m
+[0mHEAD / [32m200 [0m2.022 ms - 129[0m
+[0mHEAD / [32m200 [0m3.580 ms - 129[0m
+[0mHEAD / [32m200 [0m2.730 ms - 129[0m
+[0mHEAD / [32m200 [0m3.665 ms - 129[0m
+[0mHEAD / [32m200 [0m2.468 ms - 129[0m
+[0mHEAD / [32m200 [0m3.145 ms - 129[0m
+[0mHEAD / [32m200 [0m3.025 ms - 129[0m
+[0mHEAD / [32m200 [0m3.033 ms - 129[0m
+[0mHEAD / [32m200 [0m2.754 ms - 129[0m
+[0mHEAD / [32m200 [0m2.039 ms - 129[0m
+[0mHEAD / [32m200 [0m1.972 ms - 129[0m
+[0mHEAD / [32m200 [0m2.200 ms - 129[0m
+[0mHEAD / [32m200 [0m2.158 ms - 129[0m
+[0mHEAD / [32m200 [0m1.785 ms - 129[0m
+[0mHEAD / [32m200 [0m2.151 ms - 129[0m
+[0mHEAD / [32m200 [0m2.134 ms - 129[0m
