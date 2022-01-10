@@ -10,46 +10,61 @@ Date : 13.12.2021
 
 ## Introduction
 
-//TODO An introduction describing briefly the lab
+L'objectif de ce laboratoire est de reprendre le travail effectué dans le laboratoire précédent, soit une architecture avec un load balancer, et d'essayer de rendre la configuration la plus dynamique possible. Ce document contient la réponse aux questions demandée dans ce laboratoire d'AIT effectué à la HEIG-VD en 2022.
 
 ## Identify issues and install the tools
 
-1. <a name="M1"></a>**[M1]** Do you think we can use the current
+1. **[M1]** Do you think we can use the current
    solution for a production environment? What are the main problems
    when deploying it in a production environment?
 
-   **Réponse : **TODO
+   **Réponse : **Non, il n'est pas réellement possible de l'utiliser actuellement en production, car il n'est pas actuellement possible de gérer notre infrastructure automatiquement (ajout/supression de noeud...). Les problème lié à ceci serait que des actions manuelles seraient nécessaires afin de résoudre des problèmes sur l'infrastructure, tel qu'une augmentation de traffic ou même un problème lié au matériel.
 
 ------
 
-2. <a name="M2"></a>**[M2]** Describe what you need to do to add new
+2. **[M2]** Describe what you need to do to add new
    `webapp` container to the infrastructure. Give the exact steps of
    what you have to do without modifiying the way the things are
    done. Hint: You probably have to modify some configuration and
    script files in a Docker image.
 
-   **Réponse : **TODO
+   **Réponse : **Il faudrait suivre la procédure suivante :
+   
+   1. Modifier le fichier `.env` pour ajouter un nouveau container avec une nouvelle adresse IP et nommé par exemple `s3` pour suivre la logique de nommage actuelle.
+   
+   2. Ajouter une image dans le fichier `docker-compose.yml` en se basant sur ceux précédemment créé en le nommant `webapp3`
+   
+   3. Ajouter ce nouveau noeuds à la configuration de `HAProxy`
+   
+   4. Redémarrer `HAProxy` pour prendre en compte la nouvelle configuration
+   
+   5. Démarrer le nouveau container avec
+   
+      ```bash
+      docker-compose build
+      docker-compose up -d webapp3
+      ```
 
 ------
 
-3. <a name="M3"></a>**[M3]** Based on your previous answers, you have
+3. **[M3]** Based on your previous answers, you have
    detected some issues in the current solution. Now propose a better
    approach at a high level.
 
-   **Réponse : **TODO
+   **Réponse : ** En prenant en compte ce qui a été dit précédemment, la chose que l'on peut mettre en place est la mise à jour automatique de la configuration du `HAProxy`, afin que l'on puisse ajouter et supprimer des noeuds sans devoir en modifier la configuration manuellement.
 
 ------
 
-4. <a name="M4"></a>**[M4]** You probably noticed that the list of web
+4. **[M4]** You probably noticed that the list of web
    application nodes is hardcoded in the load balancer
    configuration. How can we manage the web app nodes in a more dynamic
    fashion?
 
-   **Réponse : **TODO
+   **Réponse : **Il faut qu'on puisse être capable d'identifier quel noeud sont actif, avec quelle adresse IP, et l'arrêt de ces noeuds. En étant capable d'observer ces événement, ils sera possible de modifier dynamiquement la configuration du load balancer, en supprimant et en ajoutant les noeuds actif dans les noeuds disponible pour le load balancer. 
 
 ------
 
-5. <a name="M5"></a>**[M5]** In the physical or virtual machines of a
+5. **[M5]** In the physical or virtual machines of a
    typical infrastructure we tend to have not only one main process
    (like the web server or the load balancer) running, but a few
    additional processes on the side to perform management tasks.
@@ -68,11 +83,35 @@ Date : 13.12.2021
    the goal? If yes, how to proceed to run for example a log
    forwarding process?
 
-   **Réponse : **TODO
+   **Réponse : **Actuellement, notre infrastructure ne peut pas accueillir plusieurs service car il s'agit là du comportement par défaut d'un containeur. Il est recommandé de ne pas utiliser plusieurs service par containeur, car cela n'a pas été conçu pour. Cependant, il est quand même possible de le faire par 2 moyens assez similaires en modifiant l'architecture :
+   
+   1. Le premier consiste à utiliser un script (processus d'entrée) qui initialise tous les services :
+   
+      ```bash
+      #!/bin/bash
+      
+      # Start the first process
+      ./my_first_process &
+        
+      # Start the second process
+      ./my_second_process &
+        
+      # Wait for any process to exit
+      wait -n
+        
+      # Exit with status of process that exited first
+      exit $?
+      ```
+   
+      Et de le lancer avec `CMD ./my_wrapper_script.sh`. Cependant, il est compliqué de voir ce qui se passe dans ces processus et il est nécessaire de modifier ce script à chaque fois qu'on modifie quelque chose.
+   
+   2. Le deuxième moyen est d'utiliser des outils comme S6, qui font environ la même chose que le point ci-dessus en mieux et nous permettent en tant que processus principal de créer autant de services que l'on veut (processus enfant), avec moins d'inconvegnants de gestions de services (processus zombie, exceptions ...) car nous avons juste à tous les copier dans un dossier, et il s'occupe de gérer les services. 
+   
+   Donc pour répondre à la question initiale, si on souhaitait ajouter un service d'envoi de log sans utiliser une de ces 2 options, ce serait impossible, car l'application par défaut est déjà le point d'entrée. 
 
 ------
 
-6. <a name="M6"></a>**[M6]** In our current solution, although the
+6. **[M6]** In our current solution, although the
    load balancer configuration is changing dynamically, it doesn't
    follow dynamically the configuration of our distributed system when
    web servers are added or removed. If we take a closer look at the
@@ -85,9 +124,9 @@ Date : 13.12.2021
    really dynamic? It's far away from being a dynamic
    configuration. Can you propose a solution to solve this?
 
-   **Réponse : **TODO
-
-
+   **Réponse : ** Si on rajoute plus de noeuds, on devra toujours modifier la configuration HAProxy pour ajouter plus de `sed`. Donc, évidemment, ce n'est pas dynamique, mais pour le devenir, il est possible d'utiliser un moteur de template, qui va adapter notre configuration `haproxy.cfg` avec les `sed` adapté en cas d'ajout ou suppression de noeud.
+   
+   
 
 **Deliverables**
 
@@ -108,7 +147,7 @@ Date : 13.12.2021
 
 ![image-20220103151415788](figures/image-20220103151415788.png)
 
-1. Describe your difficulties for this task and your understanding of
+2. Describe your difficulties for this task and your understanding of
    what is happening during this task. Explain in your own words why
    are we installing a process supervisor. Do not hesitate to do more
    research and to find more articles on that topic to illustrate the
@@ -268,14 +307,14 @@ Ils permettent de vérifier que lorsqu'un nouveau membre arrive dans le cluster,
    > improvements or ways to do the things differently. If any, provide
    > references to your readings for the improvements.
 
-   
-
-3. > (Optional:) Present a live demo where you add and remove a backend container.
-
-   
+   La solutions finale est tout a fait applicable actuellement, mais il est toujours trop long d'ajouter ou supprimer des noeuds, donc ce que l'on propose serait la mise en place d'une interface permettant d'ajouter ou supprimer des noeuds sans devoir modifier le fichier de configuration de docker-compose `docker-compose.yml`. Il existe des solutions existante comme `portainer` qui permettent de visualiser et créer des noeuds simplement.
 
 ## Difficulties
 
+La plus grande difficulté de ce laboratoire a été d'être très conscient sur ce qui était fait, et donc ne pas oublier des étapes, malgrès le fait que ce soir très clair. Malgrès toutes les explication, il n'est pas forcément facile de comprendre le rôle de tout les composant mis en place du premier coup d'oeil.
 
+Pour les problème de suivi (qui sont arrivée parfois), les seules solutions que l'on trouvait était de revérifier chaque point effectué depuis la dernière vérification, jusqu'à trouver une options incorrectes. La consigne suffisait emplement pour répondre à toutes les difficultés.
 
 ## Conclusion
+
+Malgrè la longueur évidente de ce laboratoire, nous avons aimé créer une infrastructure dynamique complète comme celle-ci pour une première fois. Il serait même intéressant d'aller plus loin, mais comme dit avant, c'était déjà très long ... 
