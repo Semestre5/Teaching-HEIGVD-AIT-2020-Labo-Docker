@@ -12,7 +12,7 @@ Date : 13.12.2021
 
 L'objectif de ce laboratoire est de reprendre le travail effectué dans le laboratoire précédent, soit une architecture avec un load balancer, et d'essayer de rendre la configuration la plus dynamique possible. Ce document contient la réponse aux questions demandée dans ce laboratoire d'AIT effectué à la HEIG-VD en 2022.
 
-## Identify issues and install the tools
+## Task 0 - Identify issues and install the tools
 
 1. **[M1]** Do you think we can use the current
    solution for a production environment? What are the main problems
@@ -60,7 +60,7 @@ L'objectif de ce laboratoire est de reprendre le travail effectué dans le labor
    configuration. How can we manage the web app nodes in a more dynamic
    fashion?
 
-   **Réponse : **Il faut qu'on puisse être capable d'identifier quel noeud sont actif, avec quelle adresse IP, et l'arrêt de ces noeuds. En étant capable d'observer ces événement, ils sera possible de modifier dynamiquement la configuration du load balancer, en supprimant et en ajoutant les noeuds actif dans les noeuds disponible pour le load balancer. 
+   **Réponse : **Il faut qu'on puisse être capable d'identifier quels noeuds sont actif, avec quelles adresses IP, et l'arrêt de ces noeuds. En étant capable d'observer ces événement, ils sera possible de modifier dynamiquement la configuration du load balancer, en supprimant et en ajoutant les noeuds actif dans les noeuds disponible pour le load balancer. 
 
 ------
 
@@ -83,7 +83,7 @@ L'objectif de ce laboratoire est de reprendre le travail effectué dans le labor
    the goal? If yes, how to proceed to run for example a log
    forwarding process?
 
-   **Réponse : **Actuellement, notre infrastructure ne peut pas accueillir plusieurs service car il s'agit là du comportement par défaut d'un containeur. Il est recommandé de ne pas utiliser plusieurs service par containeur, car cela n'a pas été conçu pour. Cependant, il est quand même possible de le faire par 2 moyens assez similaires en modifiant l'architecture :
+   **Réponse : **Actuellement, notre infrastructure ne peut pas accueillir plusieurs service car il s'agit là du comportement par défaut d'un containeur. Il est recommandé de ne pas utiliser plusieurs service par containeur, car cela n'a pas été conçu pour. Cependant, il est quand même possible de le faire par 2 moyens assez similaires en modifiant l'image créé avec :
    
    1. Le premier consiste à utiliser un script (processus d'entrée) qui initialise tous les services :
    
@@ -103,9 +103,9 @@ L'objectif de ce laboratoire est de reprendre le travail effectué dans le labor
       exit $?
       ```
    
-      Et de le lancer avec `CMD ./my_wrapper_script.sh`. Cependant, il est compliqué de voir ce qui se passe dans ces processus et il est nécessaire de modifier ce script à chaque fois qu'on modifie quelque chose.
+      Et de le lancer avec `CMD ./script-ci-dessus.sh`. Cependant, il est compliqué de voir ce qui se passe dans ces processus et il est nécessaire de modifier ce script à chaque fois qu'on modifie quelque chose.
    
-   2. Le deuxième moyen est d'utiliser des outils comme S6, qui font environ la même chose que le point ci-dessus en mieux et nous permettent en tant que processus principal de créer autant de services que l'on veut (processus enfant), avec moins d'inconvegnants de gestions de services (processus zombie, exceptions ...) car nous avons juste à tous les copier dans un dossier, et il s'occupe de gérer les services. 
+   2. Le deuxième moyen est d'utiliser des outils comme S6, qui font environ la même chose que le point ci-dessus en mieux et nous permettent en tant que processus principal de créer autant de services que l'on veut (processus enfant), avec moins d'inconvénents de gestions de services (processus zombie, exceptions ...) car nous avons juste à tous les copier dans un dossier, et il s'occupe de gérer les services. 
    
    Donc pour répondre à la question initiale, si on souhaitait ajouter un service d'envoi de log sans utiliser une de ces 2 options, ce serait impossible, car l'application par défaut est déjà le point d'entrée. 
 
@@ -124,22 +124,20 @@ L'objectif de ce laboratoire est de reprendre le travail effectué dans le labor
    really dynamic? It's far away from being a dynamic
    configuration. Can you propose a solution to solve this?
 
-   **Réponse : ** Si on rajoute plus de noeuds, on devra toujours modifier la configuration HAProxy pour ajouter plus de `sed`. Donc, évidemment, ce n'est pas dynamique, mais pour le devenir, il est possible d'utiliser un moteur de template, qui va adapter notre configuration `haproxy.cfg` avec les `sed` adapté en cas d'ajout ou suppression de noeud.
-   
-   
+   **Réponse : ** Si on rajoute plus de noeuds, ceux-ci ne seront pas disponible. Cependant, si on veut que ce noeuds soit disponible, on devra toujours modifier la configuration HAProxy pour ajouter plus de `sed`. Donc, évidemment, ce n'est pas dynamique, mais pour le devenir, il est possible d'utiliser un moteur de template, qui va adapter notre configuration `haproxy.cfg` avec les `sed` adapté en cas d'ajout ou suppression de noeud.
 
 **Deliverables**
 
-1. Take a screenshot of the stats page of HAProxy at
-   <http://192.168.42.42:1936>. You should see your backend nodes.
+1. > Take a screenshot of the stats page of HAProxy at
+   > <http://192.168.42.42:1936>. You should see your backend nodes.
 
    ![image-20220103110918747](figures/image-20220103110918747.png)
 
-2. Give the URL of your repository URL in the lab report.
+2. > Give the URL of your repository URL in the lab report.
 
    https://github.com/Semestre5/Teaching-HEIGVD-AIT-2020-Labo-Docker
 
-## Add a process supervisor to run several processes
+## Task 1 - Add a process supervisor to run several processes
 
 1. Take a screenshot of the stats page of HAProxy at
    <http://192.168.42.42:1936>. You should see your backend nodes. It
@@ -158,12 +156,12 @@ Il n'y a pas eu de grande diffculté à suivre cette installation, mais avons du
 Nous avons utiliser ce superviseur de processus afin de pouvoir avoir plusieurs services en même temps sur un containeur, et pouvoir tous les démarer en même temps. Il serait possible de le faire autremenent, mais nous devrions créer un processus qui gère les autre processus, ce qui alourdi le système. Les autres avantages que nous avons pu trouver sont les suivants :
 
 - Comme il s'agit du processus principal, nous n'auront pas de processus zombie.
-- Permet d'avoir une meilleure utilisation de docker qu'avec "un processus par containeur" car permet d'effectuer une réélle opération pas container, et pas seulement une petite fonctionnalité.
+- Permet d'avoir une meilleure utilisation de docker qu'avec "un processus par containeur" car permet d'effectuer une réelle opération pas container, et pas seulement une petite fonctionnalité.
 - En cas d'erreur, il est possible de les gérer sans éteindre le containeur, ce qui permet de le grader allumé 24h/24h. Attention : ce n'est pas forcément une bonne pratique, en cas d'échec du containeur, celui-ci devrait s'éteindre !
 
 Source : https://github.com/just-containers/s6-overlay
 
-## Add a tool to manage membership in the web server cluster
+## Task 2 - Add a tool to manage membership in the web server cluster
 
 1. > Provide the docker log output for each of the containers: `ha`,
    > `s1` and `s2`. You need to create a folder `logs` in your
@@ -171,34 +169,33 @@ Source : https://github.com/just-containers/s6-overlay
    > report. For each lab task create a folder and name it using the
    > task number. No need to create a folder when there are no logs.
 
-```bash
-docker logs ha &> ha.logs
-docker logs s1 &> s1.logs
-docker logs s2 &> s2.logs
-```
+Voir dossier `/logs/task 2/`
 
 2. > Give the answer to the question about the existing problem with the
    > current solution.
 
-Le problème actuel est que le cluster peut continuer à exister malgrè le fait que le node de load-balancing ne soit plus en marche. Ceci n'est donc pas une solution tout à fait adaptée à notre environnement. L'idéal serait que les node puisse rejoindre le node principal seulement si le load-balancer est allumé. Une solution qui pourrait être utilisée est l'utilisation de `join` dans les node de web-app qui a les propriété suivante : *pour rejoindre un cluster, un agent Serf n'a besoin de connaître qu'un seul membre existant . Après avoir rejoint le cluster, les agents bavardent entre eux pour propager les informations d'adhésion complètes.*
-
-```
- serf join ip_load_balancer
- # https://www.serf.io/intro/getting-started/join.html
-```
+Le problème actuel est que le cluster peut continuer à exister malgrè le fait que le node de load-balancing ne soit plus en marche. Ceci n'est donc pas une solution tout à fait adaptée à notre environnement. L'idéal serait que les nodes puissent rejoindre le cluster seulement si le load-balancer est allumé, et que le cluster soit détruit lorsque le load-balancer quitte le cluster. Il est cependant compliqué de mettre en place ceci, et c'est pour cela que ça n'a pas été mis en place.
 
 3. > Give an explanation on how `Serf` is working. Read the official
    > website to get more details about the `GOSSIP` protocol used in
    > `Serf`. Try to find other solutions that can be used to solve
    > similar situations where we need some auto-discovery mechanism.
 
-TODO
+Serf utilise le protocole Gossip pour communiquer au sein du cluster. Il permet à n'importe quel noeud de rejoindre un cluster en connaissant seulement une adresse IP membre du cluster, et fonctionne sur des échange complet entre les noeuds à des intervales spécifiés par une configuration. Ce protocole est aussi capable d'identifier des échec de certaines noeuds.
 
-## React to membership changes
+Il est possible de trouver sur la documentation de Serf d'autres logiciels qui résolvent les même problèmes. Ils ont donc discuté des avantages de leur solutions avec les autres disponibles, et spécifie qu'il est parfois possible de faire fonctionner ces solutions en parallèle.
 
-voir dossier `/logs`
+**Sources :** 
 
-## Use a template engine to easily generate configuration files
+https://www.serf.io/docs/internals/gossip.html#swim-protocol-overview
+
+https://www.serf.io/intro/vs-other-sw.html. 
+
+## Task 3 - React to membership changes
+
+voir dossier `/logs/task 3`
+
+## Task 4 - Use a template engine to easily generate configuration files
 
 > 1. You probably noticed when we added `xz-utils`, we have to rebuild
 >    the whole image which took some time. What can we do to mitigate
@@ -258,7 +255,7 @@ Voir dossier `/logs/task 4`
 
 Ils permettent de vérifier que lorsqu'un nouveau membre arrive dans le cluster, le template est correctement mis à jour. Sur la façon de le générer, c'est quelque chose qui est très pratique pour des fichiers de configuration, mais pas utile dans le cas présent.
 
-## G-enerate a new load balancer configuration when membership changes
+## Task 5 - G-enerate a new load balancer configuration when membership changes
 
 1. > Provide the file `/usr/local/etc/haproxy/haproxy.cfg` generated in
    > the `ha` container after each step. Three files are expected.
@@ -288,9 +285,15 @@ Ils permettent de vérifier que lorsqu'un nouveau membre arrive dans le cluster,
    > own tools or the ones you discovered online. In that case, do not
    > forget to cite your references.
 
+   On pourrait utiliser un autre outil, comme `Consul`. "Consul est un outil distribué, hautement disponible et compatible avec plusieurs centres de données pour la découverte, la configuration et l'orchestration des services. Consul permet un déploiement, une configuration et une maintenance rapides d'architectures orientées services à grande échelle. " 
    
+   Il est plus simple d'utiliser ce genre d'outil car tout est déjà inclus dedant (ou presque), même l'outil de templating.
+   
+   https://hub.docker.com/_/consul
+   
+   https://www.consul.io/
 
-## Make the load balancer automatically reload the new configuration
+## Task 6 - Make the load balancer automatically reload the new configuration
 
 1. > Take a screenshots of the HAProxy stat page showing more than 2 web
    > applications running. Additional screenshots are welcome to see a
